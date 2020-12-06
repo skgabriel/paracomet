@@ -23,9 +23,9 @@ python 3.6, pytorch >= 1.0
 
 #### Distant Supervision (COMeT) 
 
-1.  
-2. 
-3. 
+1. git clone https://github.com/allenai/comet-public.git
+2. wget https://storage.googleapis.com/ai2-mosaic/public/comet/models.zip
+3. unzip models.zip 
 
 ### References 
 
