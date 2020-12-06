@@ -15,9 +15,12 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 python >= 3.6  (I suggest using a virtual environment) 
 
+#### Get ATOMIC knowledge graph tuples 
+
 1. pip install -r requirements.txt 
 2. python -m spacy download en
 3. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
+4. tar -xvzf atomic_data.tgz 
 
 #### Distant Supervision (Heuristic) 
 
