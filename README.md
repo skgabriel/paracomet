@@ -17,7 +17,7 @@ python >= 3.6  (I suggest using a virtual environment)
 
 1. pip install -r requirements.txt 
 2. python -m spacy download en
-3. wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz ./data/atomic_data.tgz 
+3. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
 
 #### Distant Supervision (Heuristic) 
 
