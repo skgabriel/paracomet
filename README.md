@@ -33,7 +33,9 @@ python >= 3.6  (I suggest using a virtual environment)
 
 [link] 
 
-#### Evaluation data in ./data/gold_set.jsonl 
+#### Evaluation data 
+
+./data/gold_set.jsonl 
 
 ### References 
 
