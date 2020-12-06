@@ -15,7 +15,7 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 python >= 3.6  (I suggest using a virtual environment) 
 
-#### Get ATOMIC knowledge graph tuples 
+#### Setup
 
 1. pip install -r requirements.txt 
 2. python -m spacy download en
