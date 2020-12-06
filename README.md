@@ -18,7 +18,7 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 #### Distant Supervision (COMeT) 
 
-1. Download pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
+1. Follow the instructions at [link] (https://github.com/allenai/comet-public) to install the COMeT demo package 
 2. 
 3. 
 
