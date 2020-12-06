@@ -29,6 +29,12 @@ python >= 3.6  (I suggest using a virtual environment)
 1. git clone https://github.com/allenai/comet-public.git
 2. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
 
+#### Link to pretrained models 
+
+[link] 
+
+#### Evaluation data in ./data/gold_set.jsonl 
+
 ### References 
 
 Please cite this repository using the following reference:
