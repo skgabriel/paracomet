@@ -27,8 +27,7 @@ python >= 3.6  (I suggest using a virtual environment)
 #### Distant Supervision (COMeT) 
 
 1. git clone https://github.com/allenai/comet-public.git
-2. wget https://storage.googleapis.com/ai2-mosaic/public/comet/models.zip
-3. unzip models.zip 
+2. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
 
 ### References 
 
