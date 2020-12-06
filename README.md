@@ -13,11 +13,11 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 [COMING SOON] 
 
-python 3.6 
+python 3.6, pytorch >= 1.0
 
-pip install -r requirements.txt 
-
-wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz ./data/atomic_data.tgz 
+1. pip install -r requirements.txt 
+2. python -m spacy download en
+3. wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz ./data/atomic_data.tgz 
 
 #### Distant Supervision (Heuristic) 
 
