@@ -13,6 +13,13 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 [COMING SOON] 
 
+
+#### Distant Supervision (Heuristic) 
+
+#### Distant Supervision (COMeT) 
+
+Download pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
+
 ### References 
 
 Please cite this repository using the following reference:
