@@ -13,7 +13,7 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 [COMING SOON] 
 
-python 3.6, pytorch >= 1.0 (I suggest using a virtual environment) 
+python >= 3.6  (I suggest using a virtual environment) 
 
 1. pip install -r requirements.txt 
 2. python -m spacy download en
