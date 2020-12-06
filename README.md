@@ -13,12 +13,17 @@ This is a general purpose framework for aligning commonsense knowledge in the AT
 
 [COMING SOON] 
 
+python 3.6 
+
+pip install -r requirements.txt 
+
+wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz ./data/atomic_data.tgz 
 
 #### Distant Supervision (Heuristic) 
 
 #### Distant Supervision (COMeT) 
 
-1. Follow the instructions at [link] (https://github.com/allenai/comet-public) to install the COMeT demo package 
+1.  
 2. 
 3. 
 
