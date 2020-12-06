@@ -7,7 +7,7 @@ Paragraph-Level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel,
 This is a general purpose framework for aligning commonsense knowledge in the ATOMIC knowledge graph with narrative text. The repo contains 
 
 1) A framework for distantly supervised paragraph-level commonsense knowledge alignment; and 
-2) Modeling code for training pretrained transformers to generate paragraph-level commonsense inferences. 
+2) Modeling code for finetuning pretrained transformers to generate paragraph-level commonsense inferences. 
 
 ### Instructions 
 
