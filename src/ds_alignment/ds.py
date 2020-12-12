@@ -1,4 +1,3 @@
-
 """Distant supervision: from ROCStories to ATOMIC(/COMET) knowledge tuples."""
 
 # builtins
@@ -91,7 +90,7 @@ parser.add_argument(
 
 parser.add_argument("--s_index", type=int,default=0)
 
-parser.add_argument("--e_index", type=int, default=30000)
+parser.add_argument("--e_index", type=int, default=15000)
 
 parser.add_argument("--r_path",type=str,default='distant supervision')
 
@@ -375,6 +374,12 @@ def _format_comet_output(comet_out,kg_type='atomic'):
     else:
        key = "e1"
     return ([comet_out[dimensions_of_interest[0]][key],] + [json.dumps(fetch_beam(comet_out[dim])) for dim in dimensions_of_interest] + ["comet"])
+#    return (
+#        [comet_out[dimensions_of_interest[0]][key],]
+#        + [json.dumps(fetch_beam(comet_out[dim])) for dim in dimensions_of_interest]
+#        + ["comet"]
+#    ) #format change 
+
 
 STORY_FIELDS = [
     "sentence1",
