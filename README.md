@@ -29,6 +29,14 @@ python >= 3.6  (I suggest using a virtual environment)
 1. git clone https://github.com/allenai/comet-public.git
 2. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
 
+#### Train w/o memory 
+
+#### Train w memory 
+
+#### Decode w/o memory 
+
+#### Decode w memory 
+
 #### Link to pretrained models 
 
 [link] 
