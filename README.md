@@ -35,10 +35,6 @@ python >= 3.6  (I suggest using a virtual environment)
 
 #### Decode (memory)
 
-#### Link to pretrained models 
-
-[link] 
-
 #### Evaluation data 
 
 ./data/gold_set.jsonl 
