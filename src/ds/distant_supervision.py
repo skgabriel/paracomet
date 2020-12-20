@@ -2,6 +2,7 @@
 """Distant supervision: from ROCStories to ATOMIC(/COMET) knowledge tuples."""
 
 # builtins
+import sys
 import ast
 import argparse
 import csv
@@ -23,10 +24,10 @@ from rouge.rouge import rouge_n_sentence_level
 import torch
 from nltk.stem.wordnet import WordNetLemmatizer
 # local
-from ../new_metrics_small import score_prob
-from ../utils import read_jsonl_lines, write_items
-from comet.interactive.atomic_demo import DemoModel as AtomicModel
-from comet.interactive.conceptnet_demo import DemoModel as ConceptModel
+sys.path.insert(1, '../utils')
+from new_metrics_small import score_prob
+from utils import read_jsonl_lines, write_items
+from atomic_demo import DemoModel as AtomicModel
 
 random.seed(14)
 
@@ -80,7 +81,7 @@ parser.add_argument(
         "--kg_type",
         default="atomic",
         type=str,
-        help="Atomic or ConceptNet knowledge graph",
+        help="Type of knowledge graph",
 )
 
 parser.add_argument("--s_index", type=int,default=0)
@@ -373,10 +374,7 @@ def main(args):
     comet_model = None
     if args.comet:
        comet_location = os.path.join('data',args.kg_type + '_pretrained_model.th')
-       if args.kg_type == 'atomic':
-          comet_model = AtomicModel(comet_location, vocabulary_path="data/")
-       else:
-          comet_model = ConceptModel(comet_location, vocabulary_path="data/")
+       comet_model = AtomicModel(comet_location, vocabulary_path="data/")
     stories = read_jsonl_lines('data/' + args.split + "-processed.jsonl")
     stories = stories[args.s_index:args.e_index]
     names = {l.replace("\n", "").lower() for l in open("names_list.txt").readlines()}
@@ -424,19 +422,14 @@ def main(args):
                   print(vp_)
                   print(np_)
 
-               if args.kg_type == 'atomic':
-                  all_retrievals.append((idx, [retrieve_events(story['sentence' + str(idx +  1)], np_, vp_)]))
-               else:
-                  all_retrievals.append((idx, [retrieve_events(story['sentence' + str(idx +  1)], np_, vp_, kg_type='conceptnet',story=' '.join([story['sentence1'],story['sentence2'],story['sentence3'],story['sentence4'],story['sentence5']]))]))
+               all_retrievals.append((idx, [retrieve_events(story['sentence' + str(idx +  1)], np_, vp_)]))
         if len([s for s in all_retrievals if len(s[1][0]) > 0])  < 2:
            continue
         story_sents = [story[f] + '.' * (story[f][-1] != '.') for f in STORY_FIELDS]
         if len(story_sents) < 5:
            story_sents += ['no sentence.']
-        if args.kg_type == 'atomic' and not args.baseline:
+        if not args.baseline:
            relations = process_(' '.join(story_sents), all_retrievals)
-        elif args.kg_type == 'conceptnet' and not args.baseline:
-           relations = process_(' '.join(story_sents), all_retrievals,kg_type='conceptnet')
         else:
            relations = format_baseline(all_retrievals,kg_type=args.kg_type)
         if not os.path.exists(args.target_dir):
