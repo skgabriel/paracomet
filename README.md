@@ -27,7 +27,7 @@ python >= 3.6  (I suggest using a virtual environment)
 #### Distant Supervision (COMeT) 
 
 1. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
-2. python distant_supervision.py --comet --comet-location ../../data/atomic_pretrained_model.th --target_dir ../../data/atomic 
+2. python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
 
 #### Train (w/o memory)
 
