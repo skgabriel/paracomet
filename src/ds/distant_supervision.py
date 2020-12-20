@@ -23,8 +23,8 @@ from rouge.rouge import rouge_n_sentence_level
 import torch
 from nltk.stem.wordnet import WordNetLemmatizer
 # local
-from new_metrics_small import score_prob
-from utils import read_jsonl_lines, write_items
+from ../new_metrics_small import score_prob
+from ../utils import read_jsonl_lines, write_items
 from comet.interactive.atomic_demo import DemoModel as AtomicModel
 from comet.interactive.conceptnet_demo import DemoModel as ConceptModel
 
@@ -62,12 +62,6 @@ parser.add_argument(
         default="distant_atomic/",
 )
 parser.add_argument(
-        "--meta_dir",
-        type=str,
-        help="Directory to store supervision data",
-        default="none",
-)
-parser.add_argument(
         "--device",
         default="cuda",
         type=str,
@@ -100,85 +94,65 @@ parser.add_argument("--debug", action="store_true", help="Debug flag")
 args = parser.parse_args()
 
 
-if args.kg_type == 'atomic':
-   atomic_file = open("data/v4_atomic_all_agg.csv")
-   atomic_reader = csv.reader(atomic_file)
-   atomic_events = [row for row in atomic_reader]
+atomic_file = open("../../data/v4_atomic_all_agg.csv")
+atomic_reader = csv.reader(atomic_file)
+atomic_events = [row for row in atomic_reader]
 
-   header = atomic_events[0]
-   print(header)
-   atomic_events = atomic_events[1:]
+header = atomic_events[0]
+print(header)
+atomic_events = atomic_events[1:]
 
-   # causes
-   past1 = header.index("xNeed")
-   past2 = header.index("xIntent")
+# causes
+past1 = header.index("xNeed")
+past2 = header.index("xIntent")
 
-   # effects
-   future1 = header.index("xWant")
-   future2 = header.index("oEffect")
-   future3 = header.index("xReact")
-   future4 = header.index("oWant")
-   future5 = header.index("oReact")
-   future6 = header.index("xEffect")
+# effects
+future1 = header.index("xWant")
+future2 = header.index("oEffect")
+future3 = header.index("xReact")
+future4 = header.index("oWant")
+future5 = header.index("oReact")
+future6 = header.index("xEffect")
 
-   #other 
-   attr = header.index("xAttr")
+#other 
+attr = header.index("xAttr")
 
-   dimensions_of_interest = [
-     "xNeed",
-     "xIntent",
-     "xWant",
-     "oEffect",
-     "xReact",
-     "oWant",
-     "oReact",
-     "xEffect",
-     "xAttr",
+dimensions_of_interest = [
+  "xNeed",
+  "xIntent",
+  "xWant",
+  "oEffect",
+  "xReact",
+  "oWant",
+  "oReact",
+  "xEffect",
+  "xAttr",
+]
+
+kg = [
+   [
+       evt[0],
+       evt[past1],
+       evt[past2],
+       evt[future1],
+       evt[future2],
+       evt[future3],
+       evt[future4],
+       evt[future5],
+       evt[future6],
+       evt[attr],
+       evt[-1],
    ]
-
-   kg = [
-      [
-          evt[0],
-          evt[past1],
-          evt[past2],
-          evt[future1],
-          evt[future2],
-          evt[future3],
-          evt[future4],
-          evt[future5],
-          evt[future6],
-          evt[attr],
-          evt[-1],
-      ]
-      for evt in atomic_events
-   ]
-   token_index = {}
-   for idx, event in enumerate(kg):
-       event_phrase = event[0]
-       event_tokens = event_phrase.split(" ")
-       for tok in event_tokens:
-           if tok not in token_index:
-              token_index[tok] = []
-           token_index[tok].append(idx)
-else:
-   concept_file = open("data/train100k.txt")
-   kg = [row[:-1].split('\t')[:-1] for row in concept_file.readlines()]
-   rel = 0 
-   subj = 1
-   pred = 2
-   dimensions_of_interest = ['UsedFor','AtLocation','HasSubevent','CapableOf','HasPrerequisite','Causes','MotivatedByGoal','ReceivesAction','CausesDesire','HasFirstSubevent','Desires','NotDesires','HasLastSubevent'] #['DefinedAs', 'InstanceOf', 'HasFirstSubevent', 'InheritsFrom', 'NotMadeOf', 'MadeOf', 'LocatedNear', 'PartOf', 'CausesDesire', 'HasA', 'Desires', 'ReceivesAction', 'IsA', 'AtLocation', 'NotCapableOf', 'NotDesires', 'LocationOfAction', 'NotIsA', 'HasPainIntensity', 'HasPrerequisite', 'MotivatedByGoal', 'CapableOf', 'Causes', 'NotHasProperty', 'CreatedBy', 'DesireOf', 'RelatedTo', 'HasSubevent', 'HasPainCharacter', 'NotHasA', 'HasLastSubevent', 'SymbolOf', 'UsedFor', 'HasProperty'] 
-   kg = [row for row in kg if row[rel] in dimensions_of_interest]
-   token_index = {}
-   for idx, event in enumerate(kg):
-       event_tokens = ' '.join(sorted([event[subj],event[pred]]))
-       if event_tokens not in token_index:
-          token_index[event_tokens] = []
-       token_index[event_tokens].append(idx)
-
-lang_for_bert_score = "en"
-model_type_for_bert_score = "roberta-large"
-bert_score_model = AutoModel.from_pretrained(model_type_for_bert_score)
-bert_score_model.eval()
+   for evt in atomic_events
+]
+token_index = {}
+for idx, event in enumerate(kg):
+    event_phrase = event[0]
+    event_tokens = event_phrase.split(" ")
+    for tok in event_tokens:
+        if tok not in token_index:
+           token_index[tok] = []
+        token_index[tok].append(idx)
 
 def rep_entity(event):
     event = event.replace("PersonX", "PERSON")
@@ -375,12 +349,6 @@ def _format_comet_output(comet_out,kg_type='atomic'):
     else:
        key = "e1"
     return ([comet_out[dimensions_of_interest[0]][key],] + [json.dumps(fetch_beam(comet_out[dim])) for dim in dimensions_of_interest] + ["comet"])
-#    return (
-#        [comet_out[dimensions_of_interest[0]][key],]
-#        + [json.dumps(fetch_beam(comet_out[dim])) for dim in dimensions_of_interest]
-#        + ["comet"]
-#    ) #format change 
-
 
 STORY_FIELDS = [
     "sentence1",
@@ -476,11 +444,6 @@ def main(args):
         story['distance_supervision_relations'] = relations
         file_path = os.path.join(args.target_dir, story['storyid'] + ".jsonl")
         write_items([json.dumps(story)], file_path)
-        if args.meta_dir != "none":
-            metadata = {}
-            metadata['events'] = all_retrievals
-            metadata_path = os.path.join(args.meta_dir, story['storyid'] + ".jsonl")       
-            write_items([json.dumps(metadata)], metadata_path)
 
         if args.debug:
             print(story)
@@ -489,8 +452,6 @@ def main(args):
        write_items([json.dumps(r) for r in stories], output_file=os.path.join(args.r_path, args.split + '-ds.jsonl'))   
     else:
        write_items([json.dumps(r) for r in stories], output_file=os.path.join(args.target_dir, "baseline" * args.baseline + args.split + '-ds.jsonl'))
-       if args.meta_dir != "none":
-          write_items([json.dumps(r) for r in stories], output_file=os.path.join(args.meta_dir, args.split + '-ds.jsonl'))
 
 if __name__ == "__main__":
     args = parser.parse_args()
