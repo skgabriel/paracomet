@@ -7,12 +7,12 @@ import torch.nn as nn
 import math
 from pathlib import Path
 from sklearn.utils import shuffle
-from datasets import roc_stories
+from ../utils.datasets import roc_stories
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
 from modeling_openai import OpenAIGPTMemModel
-from opt import OpenAIAdam
-from utils import (encode_dataset2, iter_data, ResultLogger, make_path)
-from loss import LossCompute
+from ../utils.opt import OpenAIAdam
+from ../utils.utils import (encode_dataset2, iter_data, ResultLogger, make_path)
+from ../utils.loss import LossCompute
 import pickle
 from tensorboard_logger import configure, log_value
 
@@ -33,7 +33,8 @@ def transform_story(X1, X2):
         x15 = new_x1[-2:] + new_x1[:-2] + end_token 
         xmb_kg[i,:len(x12)] = x12
         xmb_kg[i,len(x12):len(x12)+len(x13)] = x13
-        xmb_mk[i,len(x14)+len(x15):] = 1
+        if args.mask:
+           xmb_mk[i,len(x14)+len(x15):] = 0
     return xmb_kg, xmb_mk
 
 def iter_apply(X1s, X2s, Ms):
@@ -47,7 +48,7 @@ def iter_apply(X1s, X2s, Ms):
             XMB_KG = torch.tensor(xmb1, dtype=torch.long).to(device)
             XMB_ST = torch.tensor(xmb2, dtype=torch.long).to(device) 
             if args.use_mem:
-               mem = [handle_empty(mem[i][0][:max_mem_size]) for i in range(len(mem))]
+               mem = [handle_empty(mem[i][0][:args.max_mem_size]) for i in range(len(mem))]
                mem = [torch.LongTensor([pad_rels(r) for r in m]) for m in mem]
                mem = torch.stack(mem)
                lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k)[0] 
@@ -73,16 +74,14 @@ def log(save_dir, desc='model', iter=0,save='',save_model=True):
        torch.save(model.state_dict(), make_path(path))
     return va_mean_loss
 
-max_mem_size = 45 * 5
-
 def pad_rels(relation, pad_len=100):
     return relation[:100] + [encoder['<|PAD|>']] * (100-len(relation[:100]))
 
 def handle_empty(list_of_rels):
     if len(list_of_rels) == 0:
-       return [[] for i in range(max_mem_size)]
-    if len(list_of_rels) < max_mem_size:
-       list_of_rels.extend([[] for i in range(max_mem_size - len(list_of_rels))])
+       return [[] for i in range(args.max_mem_size)]
+    if len(list_of_rels) < args.max_mem_size:
+       list_of_rels.extend([[] for i in range(args.max_mem_size - len(list_of_rels))])
     return list_of_rels 
 
 def run_epoch(iter):
@@ -91,14 +90,11 @@ def run_epoch(iter):
     for xmb_kg, xmb_st, mem in iter_data(*shuffle(trX_kg, trX_st, trMem, random_state=np.random),
                                    n_batch=n_batch_train, truncate=True, verbose=True):
         global n_updates
-        global past_loss
-        if n_updates == 0:
-           past_loss = math.inf 
         model.train()
         XMB_KG = torch.tensor(xmb_kg, dtype=torch.long).to(device)
         XMB_ST = torch.tensor(xmb_st, dtype=torch.long).to(device)
         if args.use_mem:
-           mem = [handle_empty(mem[i][0][:max_mem_size]) for i in range(len(mem))] 
+           mem = [handle_empty(mem[i][0][:args.max_mem_size]) for i in range(len(mem))] 
            mem = [torch.LongTensor([pad_rels(r) for r in m]) for m in mem]
            mem = torch.stack(mem)
            lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k)[0] 
@@ -108,33 +104,31 @@ def run_epoch(iter):
            loss = compute_loss_fct(lm_logits=lm_logits, lm_labels=XMB_KG, encoder=text_encoder, batch_num=n_updates, accum_steps=int(16/args.n_batch))
         loss = float(loss)
         losses.append(loss)
-        print(loss)
         n_updates += 1
         if (n_updates + 1) % 20000 == 0:
-           va_loss = log(save_dir,desc, iter,save='_'+str(n_updates),save_model=False)
+           va_loss = log(save_dir,'model', iter,save='_'+str(n_updates),save_model=False)
         log_value('batch_train_loss',loss,n_updates)
         log_value('mean_train_loss',np.mean(losses),n_updates)
         log_value('total_train_loss',np.sum(losses),n_updates)
-argmax = lambda x: np.argmax(x, 1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--max_mem_size',type=int,default=45*5)
+    parser.add_argument('--mask',type=bool,default=False)
     parser.add_argument('--use_multigpu',type=bool,default=True)
     parser.add_argument('--use_pretrain',type=bool,default=True)
     parser.add_argument('--use_filter',type=bool,default=True)
     parser.add_argument('--mem_k',type=int,default=1)
     parser.add_argument('--use_mem',type=bool,default=True)
-    parser.add_argument('--desc',type=str,default='model',help="Description")
     parser.add_argument('--comet',type=bool,default=True)
     parser.add_argument('--kg_type',type=str,default='atomic')
-    parser.add_argument('--log_dir', type=str, default='mem_log/')
-    parser.add_argument('--save_dir', type=str, default='mem_models/')
-    parser.add_argument('--data_dir', type=str, default='../data')
+    parser.add_argument('--log_dir', type=str, default='log/')
+    parser.add_argument('--save_dir', type=str, default='models/')
+    parser.add_argument('--data_dir', type=str, default='../../data')
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--n_iter', type=int, default=40)
+    parser.add_argument('--n_iter', type=int, default=20)
     parser.add_argument('--n_batch', type=int, default=4)
     parser.add_argument('--lr', type=float, default=6.25e-5)
-    parser.add_argument('--n_ctx', type=int, default=1024)
     parser.add_argument('--lr_schedule', type=str, default='warmup_linear')
     parser.add_argument('--lr_warmup', type=float, default=0.002)
     parser.add_argument('--b1', type=float, default=0.9)
@@ -152,8 +146,6 @@ if __name__ == '__main__':
     torch.cuda.manual_seed_all(args.seed)
     
     # Constants
-    desc = args.desc
-    n_ctx = args.n_ctx
     save_dir = args.save_dir
     data_dir = args.data_dir
     log_dir = args.log_dir
@@ -165,7 +157,7 @@ if __name__ == '__main__':
     n_gpu = torch.cuda.device_count()
     print("device", device, "n_gpu", n_gpu)
 
-    logger = ResultLogger(path=os.path.join(log_dir, '{}.jsonl'.format(desc)), **args.__dict__)
+    logger = ResultLogger(path=os.path.join(log_dir, '{}.jsonl'.format('model')), **args.__dict__)
     text_encoder = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
     encoder = text_encoder.encoder
 

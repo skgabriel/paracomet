@@ -574,7 +574,6 @@ class OpenAIGPTMemModel(OpenAIGPTPreTrainedModel):
            update_mem = self.r_embed(torch.tensor(update_mem))
            self.mem = torch.cat((self.mem,update_mem),dim=1)
         if use_mem and size_mem != 0:
-           print(size_mem)
            mean_mems = torch.mean(self.mem, dim=2)
            mean_context = torch.mean(hidden_states, dim=1)
            scores = torch.stack([self.diff(mean_mems[:,i,:], mean_context) for i in range(mean_mems.size(1))],dim=1)

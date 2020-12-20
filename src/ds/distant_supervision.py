@@ -51,9 +51,9 @@ parser.add_argument(
         help="Extract events and annotations using comet model",
 )
 parser.add_argument(
-        "--comet-location",
+        "--comet_location",
         type=str,
-        default="data/atomic_pretrained_model.th",
+        default="data",
         help="Location of trained comet model. Use setup_data.sh script to get the model.",
 )
 parser.add_argument(
@@ -373,9 +373,9 @@ def format_baseline(retrievals,kg_type='atomic'):
 def main(args):
     comet_model = None
     if args.comet:
-       comet_location = os.path.join('data',args.kg_type + '_pretrained_model.th')
-       comet_model = AtomicModel(comet_location, vocabulary_path="data/")
-    stories = read_jsonl_lines('data/' + args.split + "-processed.jsonl")
+       comet_location = os.path.join(args.comet_location,args.kg_type + '_pretrained_model.th')
+       comet_model = AtomicModel(comet_location, vocabulary_path="../../data/")
+    stories = read_jsonl_lines('../../data/' + args.split + "-processed.jsonl")
     stories = stories[args.s_index:args.e_index]
     names = {l.replace("\n", "").lower() for l in open("names_list.txt").readlines()}
    

@@ -7,76 +7,41 @@ import argparse
 from text_utils import TextEncoder
 import pickle
 import numpy as np
-from datasets import roc_stories
-from utils import (encode_dataset2, iter_data,
-                   ResultLogger, make_path)
-from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, GPT2LMHeadModel, GPT2Tokenizer
-from modeling_openai import OpenAIGPTMemModel
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from transformer_models import GPT2MemModel
 import random
-from sklearn.utils import shuffle
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--load_epoch',type=str,default='9')
+    parser.add_argument('--use_multigpu',type=bool,default=True)
+    parser.add_argument('--n_gpu',type=int,default=1)
+    parser.add_argument('--load_epoch',type=str,default='2')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--kg_type',type=str,default='atomic')
-    parser.add_argument('--use_gpt2',type=bool,default=True)   
-    parser.add_argument('--use_filter',type=bool,default=True)
-    parser.add_argument('--use_mem',type=bool,default=True)
-    parser.add_argument('--comet',type=bool, default=True)
-    parser.add_argument('--model_type',type=str,default='mem_comet') #specify model name
-    parser.add_argument('--load_data',type=str,default='../updated_gen_data')
+    parser.add_argument('--use_mem',type=bool,default=False)
+    parser.add_argument('--comet',type=bool, default=False)
+    parser.add_argument('--gen_len',type=int, default=50)
+    parser.add_argument('--model_type',type=str,default='./models/model/') #specify model path
     parser.add_argument('--save_filename',type=str,default='outputs.jsonl')
-    parser.add_argument('--original_file',type=str, default='distant_atomic_masked.jsonl')
-    parser.add_argument('--data_dir',type=str,default='../data')
+    parser.add_argument('--save_dir',type=str,default='../../data/gen_data/gpt')
+    parser.add_argument('--original_file',type=str, default='examples.jsonl')
+    parser.add_argument('--data_dir',type=str,default='../../data')
     parser.add_argument('--n_batch',type=int,default=1)
     parser.add_argument('--beam',type=int,default=10)
-    parser.add_argument('--split',type=str,default='val') #test or val?
-    parser.add_argument('--decoding',type=str,default='beam')
-    parser.add_argument('--s_split',type=int,default=0)
-    parser.add_argument('--e_split',type=int,default=5000)
     parser.add_argument('--filter_decode',type=bool,default=True)
     parser.add_argument('--mem_k',type=int,default=1)
 args = parser.parse_args()
 print(args)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#splits = [(0,5000),(5000,10000),(10000,15000),(15000,20000),(20000,25000)]
 
 random.seed(args.seed)
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 use_mem = args.use_mem
-use_gpt2 = args.use_gpt2
-
-def transform_story(X1, X2):
-    n_batch = len(X1)
-    n_ctx = 602
-    end_token = [encoder['<|endoftext|>']]
-    xmb_kg = np.tile(np.array([encoder['<|PAD|>']] * n_ctx,dtype=np.int32),(n_batch,1)) 
-    xmb_sy = np.tile(np.array([encoder['<|PAD|>']] * n_ctx,dtype=np.int32),(n_batch,1)) 
-    #xmb_kg = np.zeros((n_batch, n_ctx), dtype=np.int32)
-    #xmb_sy = np.zeros((n_batch, n_ctx), dtype=np.int32)
-    for i, (x1,x2), in enumerate(zip(X1,X2)):
-        new_x1 = x1
-        new_x2 = x2
-        x12 = new_x1
-        x13 = new_x2 + end_token
-        x14 = new_x2 
-        x15 = new_x1[-2:] + new_x1[:-2] + end_token 
-        xmb_kg[i,:len(x12)] = x12
-        xmb_sy[i,:len(x14)] = x14
-        xmb_kg[i,len(x12):len(x12)+len(x13)] = x13
-        xmb_sy[i,len(x14):len(x14)+len(x15)] = x15
-    return xmb_kg, xmb_sy
-
 device = torch.device(device)
-if use_gpt2:
-   text_encoder = GPT2Tokenizer.from_pretrained('gpt2') 
-else:
-   text_encoder = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
+text_encoder = GPT2Tokenizer.from_pretrained('gpt2') 
 encoder = text_encoder.encoder
 decoder = text_encoder.decoder
 
@@ -129,123 +94,25 @@ decoder[len(decoder)] = '<|xAttr|>'
 encoder['<|PAD|>'] = len(encoder)
 decoder[len(decoder)] = '<|PAD|>'
 
-if not use_gpt2:
-   encoder['<|endoftext|>'] = len(encoder) 
-   decoder[len(decoder)] = '<|endoftext|>'
 text_encoder.encoder = encoder
 text_encoder.decoder = decoder
 n_vocab = len(text_encoder.encoder)
 
 best_model = 'best_params_' + args.load_epoch
-
-
-if args.model_type == 'baseline_comet':
-   model_path = './models/model/'
-if args.model_type == 'baseline':
-   model_path = '/home/saadiag/testing_code/modeling/heuristic/models/model/'
-if args.model_type == 'mem':
-   model_path = '/net/nfs2.corp/mosaic/saadiag/commonArc/masked_mem_models4/model/'
-if args.model_type == 'baseline_nopre':
-   model_path = './h_models_nopre/model/'
-if args.model_type == 'mem_nopre':
-   model_path = '/net/nfs2.corp/ca-data/masked_baseline_mem_nopre/model/'
-if args.model_type == 'rec':
-   model_path = '/home/saadiag/commonArc/rec_models/model/'
-if args.model_type == 'mem_comet':
-   model_path = './comet_mem_models/model/'
-if args.model_type == 'mem3':
-   model_path = '/home/saadiag/commonArc/masked_mem3_models4/model/'
-if args.model_type == 'mem5':
-   model_path = '/home/saadiag/commonArc/masked_mem5_models4/model/'
-if args.model_type == 'mem10':
-   model_path = '/home/saadiag/commonArc/masked_mem10_models4/model/'
-if args.model_type == 'mem20':
-   model_path = '/home/saadiag/commonArc/masked_mem20_models4/model/'
-if args.model_type == 'max-mem':
-   model_path = '/home/saadiag/commonArc/max_mem_models/model/'
-if args.model_type == 'pg-mem':
-   model_path = '/home/saadiag/commonArc/pg_mem_models/model/'
-
-if args.model_type == 'ensemble':
-   model_path1 = '/home/saadiag/commonArc/masked_baseline/model/'
-   model_path1 = model_path1 + best_model
-   model_path2 = '/home/saadiag/commonArc/masked_mem_models/model/'
-   model_path2 = model_path2 + best_model
-else:
-   model_path = model_path + best_model
+model_path = args.model_type + best_model
 
 if use_mem or 'mem' in args.model_type:
-    if use_gpt2:
-       model = GPT2MemModel.from_pretrained('gpt2')
-    else:
-       model = OpenAIGPTMemModel.from_pretrained('openai-gpt')
+   model = GPT2MemModel.from_pretrained('gpt2')
 else:
-    if use_gpt2:
-       model = GPT2LMHeadModel.from_pretrained('gpt2')
-    else:
-       model = OpenAIGPTLMHeadModel.from_pretrained('openai-gpt')
-if args.model_type != 'ensemble':
-   model.resize_token_embeddings(n_vocab)
-   ##debugging
+   model = GPT2LMHeadModel.from_pretrained('gpt2')
+model.resize_token_embeddings(n_vocab)
+if args.use_multigpu:
    model = nn.DataParallel(model).to(device)
-   model.load_state_dict(torch.load(model_path))
-#   model = torch.load(model_path)
-#   model.load_state_dict(model['state_dict'])
-   model.eval()
+model.load_state_dict(torch.load(model_path))
+model.eval()
 
-print('loading transformed data')
-
-
-
-try:
-   teX, teMem, te_ids =  pickle.load(open(os.path.join(args.load_data, 'c' + '_' + 'h' * (1-args.comet) + '_' + args.kg_type + '_' + 'data.pkl'),'rb'))
-except:
-   try:
-        data_dump = pickle.load(open(args.data_dir + '/' + 'c' + '_' + 'h' * (1-args.comet) + '_' + args.kg_type + '_' + 'data.pkl','rb'))
-        if args.split == 'test':
-           teX1, teX2, teMem, te_ids = data_dump[2]
-        else:
-           teX1, teX2, teMem, te_ids = data_dump[1]
-   except:
-        ((trX1, trX2, trMem, trIds),
-         (vaX1, vaX2, vaMem, vaIds),
-         (teX1, teX2, teMem, te_ids)) = encode_dataset2(*roc_stories(args.data_dir, args.comet, args.kg_type,use_filter=False),encoder=text_encoder)
-        pickle.dump([(trX1,trX2, trMem, trIds), (vaX1, vaX2, vaMem, vaIds), (teX1, teX2, teMem, te_ids)], open(args.data_dir + '/' + 'c' + '_'  + 'h' * (1-args.comet) + '_' +  args.kg_type + '_' + 'data.pkl','wb'))
-   teX, teM = transform_story(teX1, teX2)
-   pickle.dump((teX,teMem, te_ids), open(os.path.join(args.load_data, 'c' + '_' + 'h' * (1-args.comet) + '_' + args.kg_type + '_' + 'data.pkl'),'wb'))
-
-
-
-n_gpu = 1
-print("device", device, "n_gpu", n_gpu)
-n_updates = 0
-n_batch_test = args.n_batch
-
-gen_len = 50
-
-def topk(model, XMB,i, n=1,num_beams=args.beam, mem=None,use_pointer=None,use_scores=None,size_mem=0):
-    import copy
-    gen = torch.Tensor([encoder['<|PAD|>']] * gen_len).long().to(device) #torch.zeros((gen_len)).long().to(device)
-    prob = 0
-    for step in range(gen_len):
-        if encoder['<|endoftext|>'] in gen:
-           break
-        if step == 0:
-           clear_mem = True
-        else:
-           clear_mem = False
-        XMB[:,i+1:i+gen_len+1] = gen
-        if mem == None:
-           logits, _ =  model(XMB[:,:i+1+step])
-        else:
-           logits, _ =  model(XMB[:,:i+1+step],update_mem=mem,clear_mem=clear_mem,use_pointer=use_pointer, use_scores=use_scores,mem_k=args.mem_k,use_mem=use_mem,size_mem=size_mem)
-        logits = torch.nn.functional.softmax(logits, dim=-1)
-        logits = logits[:,i+step].squeeze(1)
-        values, indices  = logits.sort(descending=True)
-        next_indices = indices[:, :num_beams].gather(-1, torch.multinomial(values[:, :num_beams], 1))
-        gen[step] = next_indices.view(-1).long() 
-        prob += float(values[:,int(gen[step])])
-    return [gen]
+print("device", device, "n_gpu", args.n_gpu)
+gen_len = args.gen_len
 
 class BeamHypotheses(object):
     def __init__(self, num_beams, max_length, length_penalty, early_stopping):
@@ -328,8 +195,6 @@ def beam_search(model, XMB, start_id, num_beams=1, max_length=gen_len, temperatu
            clear_mem = True
         else:
            clear_mem = False
-        if XMB == None:
-           import pdb; pdb.set_trace()
         if mem == None:
            if not use_mem:
               outputs  = model(input_ids=XMB)  # (batch_size * num_beams, cur_len, vocab_size)
@@ -479,31 +344,17 @@ def beam_search(model, XMB, start_id, num_beams=1, max_length=gen_len, temperatu
     gens = [decoded[0][start_id+1:]] + [s[1][start_id+1:] for s in sorted_hyps]
     return gens
 
-def get_greedy(XMB,i,encoder):
-    gen = []
-    for k in range(gen_len):
-        logits = model(XMB[:,:i+1+k])
-        next_idx = torch.multinomial(logits[:,i+k].data.exp(),1) 
-        try:
-           next_token = text_encoder.decoder[next_idx.item()]
-        except:
-           next_token = '<' + str(next_idx.item()) + '>'
-        gen.append(next_token)
-        XMB[:,i+k+1] = next_idx
-    return gen
- 
 def get_token(next_idx, tokenizer=text_encoder):
     try:
        return tokenizer.decoder[next_idx]
     except:
        return next_idx
 
-gen_file = open(os.path.join('./gen_data/gpt2', args.model_type + '_' + args.decoding + '_' + args.save_filename),'w')
-#gen_file = open(os.path.join(args.load_data, args.model_type + '_' + args.decoding + '_' + args.save_filename),'w')
-original_data = open(os.path.join(args.data_dir, args.original_file))
-original_data = [json.loads(l) for l in original_data.readlines()]    
+if not os.path.exists(args.save_dir):
+   os.makedirs(args.save_dir)
+gen_file = open(os.path.join(args.save_dir, 'beam_' + args.save_filename),'w')
 
-dims_ = {'atomic':["<|xNeed|>","<|xIntent|>","<|xWant|>","<|oEffect|>","<|xReact|>","<|oWant|>","<|oReact|>","<|xEffect|>","<|xAttr|>"],'concept':['<|UsedFor|>','<|AtLocation|>','<|HasSubevent|>','<|CapableOf|>','<|HasPrerequisite|>','<|Causes|>','<|MotivatedByGoal|>','<|ReceivesAction|>','<|CausesDesire|>','<|HasFirstSubevent|>','<|Desires|>','<|NotDesires|>','<|HasLastSubevent|>']}[args.kg_type]
+dims_ = {'atomic':["<|xNeed|>","<|xIntent|>","<|xWant|>","<|oEffect|>","<|xReact|>","<|oWant|>","<|oReact|>","<|xEffect|>","<|xAttr|>"]}[args.kg_type]
 dims = [encoder[d] for d in dims_]
 
 def clean_gen(gen):
@@ -511,10 +362,7 @@ def clean_gen(gen):
     gen = [get_token(idx) for idx in gen]
     if '<unk>' in gen:
        gen = [t for t in gen if t != '<unk>']
-    if use_gpt2:
-       gen = "".join([word.replace("Ġ", " ") for word in gen])
-    else:
-       gen = "".join([word.replace("</w>", " ") for word in gen])
+    gen = "".join([word.replace("Ġ", " ") for word in gen])
     gen = gen.replace("<|endoftext|>","")
     if gen[-1] == ' ':
        gen = gen[:-1]
@@ -523,19 +371,8 @@ def clean_gen(gen):
 def pad_rels(relation, pad_len=100):
     return relation[:100] + [encoder['<|PAD|>']] * (100-len(relation[:100]))
 
-def handle_empty(list_of_rels):
-    if len(list_of_rels) == 0:
-       return [[] for i in range(max_mem_size)]
-    if len(list_of_rels) < max_mem_size:
-       list_of_rels.extend([[] for i in range(max_mem_size - len(list_of_rels))])
-    return list_of_rels 
-
 if use_mem:
    external_mem = {}
-
-gold_set = [json.loads(l) for l in open('gold_set.jsonl').readlines()]
-gold_stories = [l['story'] for l in gold_set]
-#mem_file = open('retrieve_mem.txt','w')
 
 n_updates = 0 
 for line_ in original_data:
@@ -554,16 +391,10 @@ for line_ in original_data:
     save_output["storyid"] = id 
     save_output["story"] = " ".join(original)
     save_output["gold_relations"] = line_["distance_supervision_relations"]
-#    text_mem = []
-    for sent_id in sent_ids: #= [idx for idx in XMB[0].tolist() if idx >= encoder['<|sent0|>'] and idx <= encoder['<|sent4|>']][0]    #relations = []
-#        sent = original[int(decoder[sent_id].split('<|sent')[1].replace('|>',''))]
-#        story = original[:int(decoder[sent_id].split('<|sent')[1].replace('|>',''))]
-#        story += [decoder[sent_id].replace('sent','')]
-#        story += original[int(decoder[sent_id].split('<|sent')[1].replace('|>','')) + 1 :]
+    for sent_id in sent_ids:
         with torch.no_grad():
              for d in range(len(dims)):
-                 #new_XMB = XMB.clone()
-                 XMB = [encoder['<|PAD|>']] * 600
+                 XMB = [encoder['<|PAD|>']] * 500
                  if args.filter_decode and ('xIntent' in dims_[d] or 'xNeed' in dims_[d] or 'xAttr' in dims_[d]):
                     context = text_encoder.convert_tokens_to_ids(text_encoder.tokenize(' '.join(original[:int(decoder[sent_id].split('<|sent')[1].replace('|>',''))+1])))
                  else:
@@ -576,48 +407,22 @@ for line_ in original_data:
                  if use_mem and size_mem != 0:
                     mem = external_mem[id]
                     mem = torch.LongTensor([pad_rels(r) for r in mem]).unsqueeze(0)
-                    if args.decoding == 'topk':
-                       gen = topk(model, XMB,i_1,mem=mem,size_mem=size_mem,num_beams=args.beam)
-                    else:
-                       gen = beam_search(model, XMB,i_1,mem=mem,num_beams=args.beam,size_mem=size_mem,use_mem=use_mem)
+                    gen = beam_search(model, XMB,i_1,mem=mem,num_beams=args.beam,size_mem=size_mem,use_mem=use_mem)
                  else:
-                    if args.decoding == 'topk':
-                       if use_mem:
-                          gen = topk(model, XMB, i_1,size_mem=size_mem,num_beams=args.beam)
-                       else:
-                          gen = topk(model, XMB, i_1,num_beams=args.beam)
+                    if use_mem:
+                       gen = beam_search(model, XMB,i_1,num_beams=args.beam,size_mem=size_mem,use_mem=use_mem)                          
                     else:
-                       if use_mem:
-                          gen = beam_search(model, XMB,i_1,num_beams=args.beam,size_mem=size_mem,use_mem=use_mem)                          
-                       else:
-                          gen = beam_search(model, XMB, i_1,num_beams=args.beam)
+                       gen = beam_search(model, XMB, i_1,num_beams=args.beam)
                  gen = [clean_gen(g) for g in gen]
-                 #r = 0
-                 #while gen.replace(' ','') == 'none' and r < max_resample:
-                 #      gen = topk(model, new_XMB,i_1+len(d))
-                 #      gen = clean_gen(gen)
-                 #      r += 1
-                 #      print(r)
-                 #score_prob([story],[gen],[decoder[d]],eval_sents=[sent],kg_type=args.kg_type)[0]
                  if use_mem:
                     mem_gen = gen[0]
                     size_mem += 1
-                    #text_mem.append(mem_gen)
                     external_mem[id].append(text_encoder.convert_tokens_to_ids(text_encoder.tokenize(mem_gen)))
-                    #external_mem[id][0][0].append(text_encoder.convert_tokens_to_ids(text_encoder.tokenize(gen)))  #relations.append(gen)
-                    #external_mem[id][0][1].append(score)
-                    #external_mem[id][0][2].append(gen)
-                    #external_mem[id][0][3].append(decoder[d])
                  if decoder[sent_id] + '_' + "generated_relations" in save_output.keys(): 
                     save_output[decoder[sent_id] + '_' + "generated_relations"].append(gen)
                     save_output[decoder[sent_id] + '_' + "generated_dims"].append([decoder[dims[d]]] * len(gen))
                  else:
                     save_output[decoder[sent_id] + '_' + "generated_relations"] = [gen]
                     save_output[decoder[sent_id] + '_' + "generated_dims"] = [[decoder[dims[d]]] * len(gen)]
-                    
     gen_file.write(json.dumps(save_output) + '\n')
-#    mem_file.write(json.dumps({mem:text_mem,retrieved}) + '\n')
     n_updates += 1
-    print(n_updates)
-    print('write')
-

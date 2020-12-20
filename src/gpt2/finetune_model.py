@@ -7,12 +7,12 @@ import torch.nn as nn
 import math
 from pathlib import Path
 from sklearn.utils import shuffle
-from datasets import roc_stories
+from ../utils.datasets import roc_stories
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from transformer_models import GPT2MemModel
-from opt import OpenAIAdam
-from utils import (encode_dataset2, iter_data, ResultLogger, make_path)
-from loss import LossCompute
+from ../utils.opt import OpenAIAdam
+from ../utils.utils import (encode_dataset2, iter_data, ResultLogger, make_path)
+from ../utils.loss import LossCompute
 import pickle
 from tensorboard_logger import configure, log_value
 
