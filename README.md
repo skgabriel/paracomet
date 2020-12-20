@@ -11,8 +11,6 @@ This is a general purpose framework for aligning commonsense knowledge with narr
 
 ### Instructions 
 
-[COMING SOON] 
-
 python >= 3.6  (I suggest using a virtual environment) 
 
 #### Setup
