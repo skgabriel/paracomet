@@ -28,7 +28,7 @@ python >= 3.6  (I suggest using a virtual environment)
 
 1. git clone https://github.com/allenai/comet-public.git
 2. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB
-3. python distant_supervision.py --comet --comet_location ../../data/atomic_pretrained_model.th --target_dir ../../data/atomic 
+3. python distant_supervision.py --comet --comet-location ../../data/atomic_pretrained_model.th --target_dir ../../data/atomic 
 
 #### Train (w/o memory)
 
