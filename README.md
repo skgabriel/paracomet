@@ -19,6 +19,7 @@ python >= 3.6  (I suggest using a virtual environment)
 2. python -m spacy download en
 3. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
 4. tar -xvzf atomic_data.tgz 
+5. wget https://github.com/openai/finetune-transformer-lm/blob/master/model/encoder_bpe_40000.json
 
 #### Distant Supervision (Heuristic) 
 
