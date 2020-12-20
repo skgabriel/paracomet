@@ -30,16 +30,24 @@ dict_keys(['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sent
 
 #### Distant Supervision (Heuristic) 
 
-1. python distant_supervision.py --target_dir ../../data/atomic 
+1. cd src/ds
+2. python distant_supervision.py --target_dir ../../data/atomic 
 
 #### Distant Supervision (COMeT) 
 
 1. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
-2. python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
+2. cd src/ds
+3. python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
 
 #### Train (w/o memory)
 
+1. cd src/gpt or src/gpt2 
+2. python finetune_model.py --log_dir /log --model_dir /models --data_dir ../../data --use_mem False 
+
 #### Train (memory)
+
+1. cd src/gpt or src/gpt2 
+2. python finetune_model.py --log_dir /mem_log --model_dir /mem_models --data_dir ../../data --use_mem True
 
 #### Decode (w/o memory) 
 
