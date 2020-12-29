@@ -796,10 +796,9 @@ class GPT2MemModel(GPT2PreTrainedModel):
 
     def forward(self, input_ids=None, past=None, attention_mask=None, token_type_ids=None, position_ids=None, head_mask=None, inputs_embeds=None,
                 labels=None, update_mem=None,clear_mem=False,mem_k=1,use_mem=True,size_mem=0):
-        if input_ids == None:
-           import pdb; pdb.set_trace()
         if clear_mem == True:
-           self.mem = torch.zeros((input_ids.size(0),0,100,self.config.n_embd)).cuda()
+           device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+           self.mem = torch.zeros((input_ids.size(0),0,100,self.config.n_embd)).to(device)
         transformer_outputs = self.transformer(input_ids,
                                                past=past,
                                                attention_mask=attention_mask,

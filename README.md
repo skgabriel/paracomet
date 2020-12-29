@@ -97,7 +97,7 @@ python decode.py --model_type ./mem_models/model --original_file '../../data/c_a
 |mem        | Para-M (w Memory)   | [link](https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d) |
 |nomem      | Para-M (w/o Memory) | [link](https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d) |
 
-Note: Models were trained in a multi gpu setting, so ensure args.use_multigpu is set to True when decoding from pretrained models 
+Note: Models were trained in a multi gpu setting, so ensure args.use_multigpu is set to True when decoding from pretrained models. 
 
 ### References 
 

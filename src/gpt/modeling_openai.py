@@ -560,7 +560,8 @@ class OpenAIGPTMemModel(OpenAIGPTPreTrainedModel):
 
     """
         if clear_mem == True:
-           self.mem = torch.zeros((input_ids.size(0),0,100,self.config.n_embd)).cuda()
+           device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+           self.mem = torch.zeros((input_ids.size(0),0,100,self.config.n_embd)).to(device)
         transformer_outputs = self.transformer(
             input_ids,
             attention_mask=attention_mask,
