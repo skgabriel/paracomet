@@ -1,8 +1,8 @@
-## Paragraph-Level Commonsense Transformers with Recurrent Memory 
+## Paragraph-level Commonsense Transformers with Recurrent Memory 
 
 This repository contains the code used in the paper:
 
-Paragraph-Level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [link] (https://arxiv.org/abs/2010.01486)
+Paragraph-level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [link] (https://arxiv.org/abs/2010.01486)
 
 This is a general purpose framework for aligning commonsense knowledge with narrative text. The repo contains 
 
@@ -39,19 +39,34 @@ dict_keys(['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sent
 2. cd src/ds
 3. python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
 
+#### Processing data for training models 
+
+Combine distantly supervised data into a single file "all_data.jsonl" by running combine_files.py in ds folder  
+Split data using split.py in ds folder 
+
+Change format between comet and heuristic data by setting comet = True or comet = False in split.py file 
+For comet data, files are in the format "c_h_atomic_{split}.txt"
+For heuristic data, files are in the format "h_atomic_{split}.txt"
+
 #### Train (w/o memory)
 
 1. cd src/gpt or src/gpt2 
-2. python finetune_model.py --log_dir /log --model_dir /models --data_dir ../../data --use_mem False 
+2. python finetune_model.py --log_dir ./log --model_dir ./models --data_dir ../../data --use_mem False --comet True 
 
 #### Train (memory)
 
 1. cd src/gpt or src/gpt2 
-2. python finetune_model.py --log_dir /mem_log --model_dir /mem_models --data_dir ../../data --use_mem True
+2. python finetune_model.py --log_dir ./mem_log --model_dir ./mem_models --data_dir ../../data --use_mem True --comet True
 
 #### Decode (w/o memory) 
 
+1. cd src/gpt or src/gpt2 
+2. python decode.py --model_type ./models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 8 
+
 #### Decode (memory)
+
+1. cd src/gpt or src/gpt2 
+2. python decode.py --model_type ./mem_models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 9 --use_mem True
 
 #### Evaluation data 
 
@@ -63,7 +78,7 @@ Please cite this repository using the following reference:
 
 ```
 @inproceedings{Gabriel2021ParagraphLevelCT,
-title={Paragraph-Level Commonsense Transformers with Recurrent Memory},
+title={Paragraph-level Commonsense Transformers with Recurrent Memory},
 author={Gabriel, Saadia and Bhagavatula, Chandra and Shwartz, Vered and Le Bras, Ronan and Forbes, Maxwell and Choi, Yejin},
 booktitle={AAAI},
 year={2021},
