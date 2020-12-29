@@ -94,8 +94,8 @@ python decode.py --model_type ./mem_models/model --original_file '../../data/c_a
 
 |Model Name | Model Type          | Link                                                                                 |   
 |---------------------------------|--------------------------------------------------------------------------------------|
-|mem        | Para-M (w Memory)   | [link][https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d] |
-|nomem      | Para-M (w/o Memory) | [link][https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d] |
+|mem        | Para-M (w Memory)   | [link](https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d) |
+|nomem      | Para-M (w/o Memory) | [link](https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d) |
 
 ### References 
 
