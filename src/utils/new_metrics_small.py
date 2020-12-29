@@ -88,7 +88,7 @@ def score_prob(cands, refs, types, eval_sents=None, mask_rel=True, kg_type='atom
         inputs[i,:len(tensor_input[i])] = torch.Tensor(tensor_input[i])
     losses = []
     steps = 0
-    batch_size = 130 #batch_size = 108
+    batch_size = 8 
     inputs = inputs.long().cuda()
     input_mask = mask.cuda()
     loss_fct = torch.nn.CrossEntropyLoss(reduction="none")

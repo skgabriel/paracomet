@@ -54,8 +54,10 @@ def _roc_stories(data_dir, split, comet=False, kg_type='atomic', use_filter=True
     return srcs, tgts, mems, ids
 
 def roc_stories(data_dir, comet=False, kg_type='atomic',use_filter=True):
+    print('starting to process data')
     train_stories, train_infs, train_mems, train_ids = _roc_stories(data_dir, 'train',comet, kg_type,use_filter=use_filter)
+    print('done with train')
     val_stories, val_infs, val_mems, val_ids = _roc_stories(data_dir, 'val', comet, kg_type,use_filter=use_filter)
-    test_stories, test_infs, test_mems, test_ids = _roc_stories(data_dir, 'test', comet, kg_type,use_filter=use_filter)
-    return (train_stories, train_infs, train_mems, train_ids), (val_stories, val_infs, val_mems, val_ids), (test_stories, test_infs, test_mems, test_ids)
+    print('done with val')
+    return (train_stories, train_infs, train_mems, train_ids), (val_stories, val_infs, val_mems, val_ids)
 

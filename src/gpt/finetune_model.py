@@ -1,3 +1,4 @@
+import sys
 import os
 import argparse
 import random
@@ -7,12 +8,13 @@ import torch.nn as nn
 import math
 from pathlib import Path
 from sklearn.utils import shuffle
-from ../utils.datasets import roc_stories
+sys.path.insert(1, '../utils')
+from datasets import roc_stories
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
 from modeling_openai import OpenAIGPTMemModel
-from ../utils.opt import OpenAIAdam
-from ../utils.utils import (encode_dataset2, iter_data, ResultLogger, make_path)
-from ../utils.loss import LossCompute
+from opt import OpenAIAdam
+from utils import (encode_dataset2, iter_data, ResultLogger, make_path)
+from loss import LossCompute
 import pickle
 from tensorboard_logger import configure, log_value
 
@@ -48,10 +50,10 @@ def iter_apply(X1s, X2s, Ms):
             XMB_KG = torch.tensor(xmb1, dtype=torch.long).to(device)
             XMB_ST = torch.tensor(xmb2, dtype=torch.long).to(device) 
             if args.use_mem:
-               mem = [handle_empty(mem[i][0][:args.max_mem_size]) for i in range(len(mem))]
+               mem = [handle_empty(mem[i][0][:args.max_mem_size*5]) for i in range(len(mem))]
                mem = [torch.LongTensor([pad_rels(r) for r in m]) for m in mem]
                mem = torch.stack(mem)
-               lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k)[0] 
+               lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k,size_mem=1)[0] 
                loss = compute_loss_fct(lm_logits=lm_logits, lm_labels=XMB_KG, encoder=text_encoder, only_return_losses=True)
             else:
                lm_logits = model(XMB_KG,attention_mask=XMB_ST)[0]
@@ -79,9 +81,9 @@ def pad_rels(relation, pad_len=100):
 
 def handle_empty(list_of_rels):
     if len(list_of_rels) == 0:
-       return [[] for i in range(args.max_mem_size)]
-    if len(list_of_rels) < args.max_mem_size:
-       list_of_rels.extend([[] for i in range(args.max_mem_size - len(list_of_rels))])
+       return [[] for i in range(args.max_mem_size*5)]
+    if len(list_of_rels) < args.max_mem_size*5:
+       list_of_rels.extend([[] for i in range(args.max_mem_size*5 - len(list_of_rels))])
     return list_of_rels 
 
 def run_epoch(iter):
@@ -94,10 +96,10 @@ def run_epoch(iter):
         XMB_KG = torch.tensor(xmb_kg, dtype=torch.long).to(device)
         XMB_ST = torch.tensor(xmb_st, dtype=torch.long).to(device)
         if args.use_mem:
-           mem = [handle_empty(mem[i][0][:args.max_mem_size]) for i in range(len(mem))] 
+           mem = [handle_empty(mem[i][0][:args.max_mem_size*5]) for i in range(len(mem))] 
            mem = [torch.LongTensor([pad_rels(r) for r in m]) for m in mem]
            mem = torch.stack(mem)
-           lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k)[0] 
+           lm_logits = model(XMB_KG, attention_mask=XMB_ST, update_mem=mem, clear_mem=True, mem_k=args.mem_k,size_mem=1)[0] 
            loss = compute_loss_fct(lm_logits=lm_logits, lm_labels=XMB_KG, encoder=text_encoder, batch_num=n_updates, accum_steps=int(16/args.n_batch))
         else:
            lm_logits = model(XMB_KG,attention_mask=XMB_ST)[0]
@@ -113,7 +115,7 @@ def run_epoch(iter):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--max_mem_size',type=int,default=45*5)
+    parser.add_argument('--max_mem_size',type=int,default=45)
     parser.add_argument('--mask',type=bool,default=False)
     parser.add_argument('--use_multigpu',type=bool,default=True)
     parser.add_argument('--use_pretrain',type=bool,default=True)
@@ -122,9 +124,9 @@ if __name__ == '__main__':
     parser.add_argument('--use_mem',type=bool,default=True)
     parser.add_argument('--comet',type=bool,default=True)
     parser.add_argument('--kg_type',type=str,default='atomic')
-    parser.add_argument('--log_dir', type=str, default='log/')
-    parser.add_argument('--save_dir', type=str, default='models/')
-    parser.add_argument('--data_dir', type=str, default='../../data')
+    parser.add_argument('--log_dir', type=str, default='./log/')
+    parser.add_argument('--model_dir', type=str, default='./models/')
+    parser.add_argument('--data_dir', type=str, default='../../data/gpt')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--n_iter', type=int, default=20)
     parser.add_argument('--n_batch', type=int, default=4)
@@ -146,7 +148,7 @@ if __name__ == '__main__':
     torch.cuda.manual_seed_all(args.seed)
     
     # Constants
-    save_dir = args.save_dir
+    save_dir = args.model_dir
     data_dir = args.data_dir
     log_dir = args.log_dir
 
@@ -186,24 +188,21 @@ if __name__ == '__main__':
     text_encoder.encoder = encoder
     n_vocab = len(text_encoder.encoder)
     print("Encoding dataset...")
+
     try:
-        data_dump = pickle.load(open(data_dir + '/' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','rb'))
-        trX1, trX2, trMem, trIds = data_dump[0]
-        vaX1, vaX2, vaMem, vaIds = data_dump[1]
-        teX1, teX2, teMem, teIds = data_dump[2]
+       trX_kg, trX_st, trMem, vaX_kg, vaX_st, vaMem =  pickle.load(open(data_dir + '/' + 't_' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','rb'))
     except:
+       try:
+          data_dump = pickle.load(open(data_dir + '/' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','rb'))
+          trX1, trX2, trMem, trIds = data_dump[0]
+          vaX1, vaX2, vaMem, vaIds = data_dump[1]
+       except:
         ((trX1, trX2, trMem, trIds),
-         (vaX1, vaX2, vaMem, vaIds),
-         (teX1, teX2, teMem, teIds)) = encode_dataset2(*roc_stories(data_dir, args.comet, args.kg_type),encoder=text_encoder)
-        pickle.dump([(trX1,trX2, trMem, trIds), (vaX1, vaX2, vaMem, vaIds), (teX1, teX2, teMem, teIds)], open(data_dir + '/' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' +  args.kg_type + '_' + 'data.pkl','wb'))
-    
-    try:
-       trX_kg, trX_st, vaX_kg, vaX_st =  pickle.load(open(data_dir + '/' + 't_' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','rb'))
-    except:
+         (vaX1, vaX2, vaMem, vaIds)) = encode_dataset2(*roc_stories(data_dir, args.comet, args.kg_type),encoder=text_encoder)
+        pickle.dump([(trX1,trX2, trMem, trIds), (vaX1, vaX2, vaMem, vaIds)], open(data_dir + '/' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' +  args.kg_type + '_' + 'data.pkl','wb'))
        trX_kg, trX_st = transform_story(trX1, trX2)
        vaX_kg, vaX_st = transform_story(vaX1, vaX2)
-       pickle.dump((trX_kg, trX_st, vaX_kg, vaX_st), open(data_dir + '/t_' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','wb'))
-
+       pickle.dump((trX_kg, trX_st, trMem, vaX_kg, vaX_st, vaMem), open(data_dir + '/t_' + 'c' * args.comet + 'h' * (1-args.comet) + '_' + args.use_filter * 'filtered_' + args.kg_type + '_' + 'data.pkl','wb'))
     n_train = len(trX_kg)
     n_valid = len(vaX_kg)
     n_batch_train = args.n_batch * max(n_gpu, 1)

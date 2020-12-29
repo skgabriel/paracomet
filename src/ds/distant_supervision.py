@@ -1,7 +1,6 @@
 
 """Distant supervision: from ROCStories to ATOMIC(/COMET) knowledge tuples."""
 
-# builtins
 import sys
 import ast
 import argparse
@@ -13,17 +12,16 @@ import pickle
 import random
 import time
 import math
-# 3rd party
+import nltk 
 import en_core_web_sm
-import nltk
 import numpy as np
 import spacy
 from tqdm import tqdm
-from transformers import AutoModel, GPT2LMHeadModel, GPT2Tokenizer
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from rouge.rouge import rouge_n_sentence_level
 import torch
-from nltk.stem.wordnet import WordNetLemmatizer
-# local
+
+#local
 sys.path.insert(1, '../utils')
 from new_metrics_small import score_prob
 from utils import read_jsonl_lines, write_items
@@ -32,8 +30,6 @@ from atomic_demo import DemoModel as AtomicModel
 random.seed(14)
 
 nlp = spacy.load("en_core_web_sm")
-
-lemm = WordNetLemmatizer()
 
 STOP_WORDS = set(nlp.Defaults.stop_words)
 
@@ -84,9 +80,9 @@ parser.add_argument(
         help="Type of knowledge graph",
 )
 
-parser.add_argument("--s_index", type=int,default=0)
+parser.add_argument("--s_index", type=int,default=0,help="Starting processing at x examples")
 
-parser.add_argument("--e_index", type=int, default=15000)
+parser.add_argument("--e_index", type=int, default=100000,help="Process up to x examples")
 
 parser.add_argument("--r_path",type=str,default='distant supervision')
 
