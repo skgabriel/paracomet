@@ -11,7 +11,7 @@ This is a general purpose framework for aligning commonsense knowledge with narr
 
 ### Examples 
 
-Our models infer about the social commonsense underlying narratives (i.e. reactions or changes in emotions of characters related to what would likely happen or have happened at a particular point in a narrative):
+Our models infer about the social commonsense underlying narratives (i.e. reactions or changes in emotions of characters related to what would likely happen or has likely already happened at a particular point in a narrative):
 
 |Story | Model Prediction          | 
 |-----------|---------------------|
