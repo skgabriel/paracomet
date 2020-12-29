@@ -28,7 +28,9 @@ tar -xvzf atomic_data.tgz
 
 Data for distant supervision should be a file "train-processed.jsonl" in the data folder. The file should contain the following keys:
 
+```
 dict_keys(['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sentence4', 'sentence5', 'sentence1_tokens', 'sentence1_noun_phrases', 'sentence1_verb_phrases', 'sentence2_tokens', 'sentence2_noun_phrases', 'sentence2_verb_phrases', 'sentence3_tokens', 'sentence3_noun_phrases', 'sentence3_verb_phrases', 'sentence4_tokens', 'sentence4_noun_phrases', 'sentence4_verb_phrases', 'sentence5_tokens', 'sentence5_noun_phrases', 'sentence5_verb_phrases'])
+```
 
 #### Distant Supervision (Heuristic) 
 
