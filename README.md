@@ -2,7 +2,7 @@
 
 This repository contains the code used in the paper:
 
-Paragraph-level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [link](https://arxiv.org/abs/2010.01486)
+Paragraph-level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [[ArXiv]](https://arxiv.org/abs/2010.01486)
 
 This is a general purpose framework for aligning commonsense knowledge with narrative text. The repo contains 
 
