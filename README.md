@@ -34,6 +34,8 @@ wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz
 tar -xvzf atomic_data.tgz 
 ```
 
+Note: torch and torchvision may need to be installed with a specified cuda version to run on GPUs (for example, if the cuda version is 10.1, the install command for torch should be torch=={torch_version}+101
+
 #### Prep for Distant Supervision 
 
 Data for distant supervision should be a file "train-processed.jsonl" in the data folder. The file should contain the following keys:
