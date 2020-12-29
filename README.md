@@ -15,8 +15,8 @@ Our models infer about the *social commonsense* underlying narratives (i.e. reac
 
 |Story | Model Prediction          | 
 |-----------|---------------------|
-|Almost a month ago now, the radio station got struck by lightning. It fried the router and the cable modem...      | PersonX wanted to have better internet, PersonX wanted to not be bothered  |
-|I posted a moment ago about a girl I asked out...she said she would like to do something, but work made it difficult. That was a couple of weeks back...      | PersonX will be asked out, PersonX will be rejected |
+|Almost a month ago now, the radio station got struck by lightning. It fried the router and the cable modem...      | [Past] PersonX wanted to have better internet, PersonX wanted to not be bothered  |
+|I posted a moment ago about a girl I asked out...she said she would like to do something, but work made it difficult. That was a couple of weeks back...      | [Future] PersonX will be asked out, PersonX will be rejected |
 
 
 ### Instructions 
