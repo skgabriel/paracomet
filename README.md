@@ -17,9 +17,12 @@ Note: For now, code assumes that stories contain at most 5 sentences and models 
 
 #### Setup
 
-1. pip install -r requirements.txt 
-2. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
-3. tar -xvzf atomic_data.tgz 
+```
+pip install -r requirements.txt 
+cd data
+wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
+tar -xvzf atomic_data.tgz 
+```
 
 #### Prep for distant supervision 
 
@@ -29,14 +32,19 @@ dict_keys(['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sent
 
 #### Distant Supervision (Heuristic) 
 
-1. cd src/ds
-2. python distant_supervision.py --target_dir ../../data/atomic 
+```
+cd src/ds
+python distant_supervision.py --target_dir ../../data/atomic 
+```
 
 #### Distant Supervision (COMeT) 
 
-1. Get pretrained models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
-2. cd src/ds
-3. python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
+Get pretrained COMeT models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
+
+```
+cd src/ds
+python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
+```
 
 #### Processing data for training models 
 
@@ -52,23 +60,29 @@ For heuristic data, files are in the format "h_atomic_{split}.txt"
 
 #### Train (w/o memory)
 
-1. cd src/gpt or src/gpt2 
-2. python finetune_model.py --log_dir ./log --model_dir ./models --data_dir ../../data --use_mem False --comet True 
-
+```
+cd src/gpt (or src/gpt2) 
+python finetune_model.py --log_dir ./log --model_dir ./models --data_dir ../../data --use_mem False --comet True 
+```
 #### Train (memory)
 
-1. cd src/gpt or src/gpt2 
-2. python finetune_model.py --log_dir ./mem_log --model_dir ./mem_models --data_dir ../../data --use_mem True --comet True
+```
+cd src/gpt (or src/gpt2) 
+python finetune_model.py --log_dir ./mem_log --model_dir ./mem_models --data_dir ../../data --use_mem True --comet True
+```
 
 #### Decode (w/o memory) 
 
-1. cd src/gpt or src/gpt2 
-2. python decode.py --model_type ./models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 8 
-
+```
+cd src/gpt (or src/gpt2) 
+python decode.py --model_type ./models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 8 
+```
 #### Decode (memory)
 
-1. cd src/gpt or src/gpt2 
-2. python decode.py --model_type ./mem_models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 9 --use_mem True
+```
+cd src/gpt (or src/gpt2) 
+python decode.py --model_type ./mem_models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 9 --use_mem True
+```
 
 #### Evaluation data 
 
