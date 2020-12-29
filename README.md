@@ -98,7 +98,7 @@ python decode.py --model_type ./models/model --original_file '../../data/c_atomi
 cd src/gpt (or src/gpt2) 
 python decode.py --model_type ./mem_models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 9 --use_mem True
 ```
-Note: Make sure to decode using one GPU for memory model. (If using a multi GPU setting, specify CUDA_VISIBLE_DEVICES={device_id} before the python command)
+Note: Make sure to decode using one gpu for memory model. (If using a multi gpu setting, specify CUDA_VISIBLE_DEVICES={device_id} before the python command)
 
 #### Evaluation Data 
 
