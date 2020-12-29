@@ -9,6 +9,16 @@ This is a general purpose framework for aligning commonsense knowledge with narr
 1) A framework for distantly supervised paragraph-level commonsense knowledge alignment; and 
 2) Modeling code for finetuning pretrained transformers to generate paragraph-level commonsense inferences. 
 
+### Examples 
+
+Our models infer about the social commonsense underlying narratives (i.e. reactions or changes in emotions of characters related to what would likely happen or have happened at a particular point in a narrative):
+
+|Story | Model Prediction          | 
+|-----------|---------------------|
+|Almost a month ago now, the radio station got struck by lightning. It fried the router and the cable modem...      | Before, PersonX wanted to have better internet, to not be bothered  |
+|nomem      | Para-M (w/o Memory) |
+
+
 ### Instructions 
 
 python >= 3.6  (I suggest using a virtual environment) 
