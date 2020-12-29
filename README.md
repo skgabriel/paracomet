@@ -13,7 +13,7 @@ This is a general purpose framework for aligning commonsense knowledge with narr
 
 python >= 3.6  (I suggest using a virtual environment) 
 
-Note: For now, code assumes that stories contain at most 5 sentences and models generate inferences for up to 5 sentence stories 
+Note: For now, the code assumes that stories contain at most 5 sentences and models generate inferences for up to 5 sentence stories. 
 
 #### Setup
 
@@ -39,9 +39,9 @@ cd src/ds
 python distant_supervision.py --target_dir ../../data/atomic 
 ```
 
-#### Distant Supervision (COMeT) 
+#### Distant Supervision (COMET) 
 
-Get pretrained COMeT models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
+Get pretrained comet models from [link] https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder 
 
 ```
 cd src/ds
