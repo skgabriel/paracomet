@@ -18,9 +18,8 @@ Note: For now, code assumes that stories contain at most 5 sentences and models 
 #### Setup
 
 1. pip install -r requirements.txt 
-2. python -m spacy download en
-3. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
-4. tar -xvzf atomic_data.tgz 
+2. cd data, wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
+3. tar -xvzf atomic_data.tgz 
 
 #### Prep for distant supervision 
 

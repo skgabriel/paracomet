@@ -1,9 +1,15 @@
-
-torch==1.0
-tensorflow
-ftfy==5.1
-spacy
-tensorboardX
-tqdm
-pandas
-ipython
+allennlp==0.8.1
+easy-rouge==0.2.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz
+ftfy==5.8
+nltk==3.5
+numpy==1.19.4
+pandas==1.1.5
+python-Levenshtein==0.12.0
+pytorch-pretrained-bert==0.3.0
+spacy==2.0.18
+tensorboard-logger==0.1.0
+torch==1.6.0+cu101
+torchvision==0.7.0+cu101
+tqdm==4.54.1
+transformers==2.8.0
