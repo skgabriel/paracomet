@@ -24,7 +24,7 @@ wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz
 tar -xvzf atomic_data.tgz 
 ```
 
-#### Prep for distant supervision 
+#### Prep for Distant Supervision 
 
 Data for distant supervision should be a file "train-processed.jsonl" in the data folder. The file should contain the following keys:
 
@@ -41,14 +41,14 @@ python distant_supervision.py --target_dir ../../data/atomic
 
 #### Distant Supervision (COMET) 
 
-Get pretrained comet models from [link] (https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB and place in data folder)
+Get pretrained comet models from [link] (https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB) and place in data folder
 
 ```
 cd src/ds
 python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
 ```
 
-#### Processing data for training models 
+#### Processing Data for Training Models 
 
 Combine distantly supervised data into a single file "all_data.jsonl" by running combine_files.py in ds folder  
 
@@ -60,35 +60,42 @@ For comet data, files are in the format "c_h_atomic_{split}.txt"
 
 For heuristic data, files are in the format "h_atomic_{split}.txt"
 
-#### Train (w/o memory)
+#### Train (w/o Memory)
 
 ```
 cd src/gpt (or src/gpt2) 
 python finetune_model.py --log_dir ./log --model_dir ./models --data_dir ../../data --use_mem False --comet True 
 ```
-#### Train (memory)
+#### Train (Memory)
 
 ```
 cd src/gpt (or src/gpt2) 
 python finetune_model.py --log_dir ./mem_log --model_dir ./mem_models --data_dir ../../data --use_mem True --comet True
 ```
 
-#### Decode (w/o memory) 
+#### Decode (w/o Memory) 
 
 ```
 cd src/gpt (or src/gpt2) 
 python decode.py --model_type ./models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 8 
 ```
-#### Decode (memory)
+#### Decode (Memory)
 
 ```
 cd src/gpt (or src/gpt2) 
 python decode.py --model_type ./mem_models/model --original_file '../../data/c_atomic_test.jsonl' --data_dir ../../data --save_dir ../../data/gen_data --save_filename 'outputs.jsonl' --load_epoch 9 --use_mem True
 ```
 
-#### Evaluation data 
+#### Evaluation Data 
 
 ./data/gold_set.jsonl 
+
+#### Pretrained Models 
+
+|Model Type          | Link |   
+|--------------------|------|
+|Para-M (w Memory)   | link |
+|Para-M (w/o Memory) | link |
 
 ### References 
 
