@@ -92,10 +92,10 @@ python decode.py --model_type ./mem_models/model --original_file '../../data/c_a
 
 #### Pretrained Models 
 
-|Model Type          | Link |   
-|--------------------|------|
-|Para-M (w Memory)   | link |
-|Para-M (w/o Memory) | link |
+|Model Name | Model Type          | Link |   
+|---------------------------------|------|
+|mem        | Para-M (w Memory)   | [https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d][link] |
+|nomem      | Para-M (w/o Memory) | [https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d][link] |
 
 ### References 
 
