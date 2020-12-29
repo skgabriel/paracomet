@@ -2,7 +2,7 @@
 
 This repository contains the code used in the paper:
 
-Paragraph-level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [link] (https://arxiv.org/abs/2010.01486)
+Paragraph-level Commonsense Transformers with Recurrent Memory. *Saadia Gabriel, Chandra Bhagavatula, Vered Shwartz, Ronan Le Bras, Maxwell Forbes, Yejin Choi*. AAAI 2021. [link](https://arxiv.org/abs/2010.01486)
 
 This is a general purpose framework for aligning commonsense knowledge with narrative text. The repo contains 
 
@@ -41,7 +41,7 @@ python distant_supervision.py --target_dir ../../data/atomic
 
 #### Distant Supervision (COMET) 
 
-Get pretrained comet models from [link] (https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB) and place in data folder
+Get pretrained comet models from [link](https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB) and place in data folder
 
 ```
 cd src/ds
@@ -88,7 +88,7 @@ python decode.py --model_type ./mem_models/model --original_file '../../data/c_a
 
 #### Evaluation Data 
 
-./data/gold_set.jsonl 
+[Data](https://github.com/skgabriel/paracomet/blob/main/data/gold_set.jsonl)
 
 #### Pretrained Models 
 
