@@ -12,3 +12,8 @@ torch==1.6.0
 torchvision==0.7.0
 tqdm==4.54.1
 transformers==2.8.0
+ipython
+mypy
+black
+typing-extensions
+textacy
