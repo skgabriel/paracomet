@@ -58,7 +58,7 @@ Get pretrained comet models from [link](https://drive.google.com/open?id=1FccEsY
 
 ```
 cd src/ds
-python distant_supervision.py --comet --comet-location ../../data --target_dir ../../data/atomic 
+python distant_supervision.py --comet --comet_location ../../data --target_dir ../../data/atomic 
 ```
 
 #### Processing Data for Training Models 
