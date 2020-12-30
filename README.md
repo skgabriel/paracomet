@@ -104,6 +104,10 @@ Note: Make sure to decode using one GPU for memory model. (If using a multi GPU 
 
 [Data](https://github.com/skgabriel/paracomet/blob/main/data/gold_set.jsonl)
 
+Evaluation scripts are included under src/eval, including scripts to reformat generated inferences for NLI evaluation. To run the full NLI evaluation, refer to the original github repo for [SEMBERT](https://github.com/cooelf/SemBERT). 
+
+
+
 #### Pretrained Models 
 
 |Model Name | Model Type          | Link                                                                                 |   
