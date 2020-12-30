@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import argparse
 sys.path.insert(1, '../utils')
-from text_utils import TextEncoder
+from text_utils import TextEncoder, fix_malformed
 import pickle
 import numpy as np
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
@@ -142,7 +142,7 @@ def clean_gen(gen):
     gen = gen.replace("<|endoftext|>","")
     if gen[-1] == ' ':
        gen = gen[:-1]
-    return gen
+    return fix_malformed(gen)
 
 def pad_rels(relation, pad_len=100):
     return relation[:100] + [encoder['<|PAD|>']] * (100-len(relation[:100]))

@@ -224,7 +224,6 @@ if __name__ == '__main__':
        model = nn.DataParallel(model)
     model = model.to(device)
     criterion = nn.CrossEntropyLoss(reduction='mean',ignore_index=encoder['<|PAD|>'])
-    print(args.lr)
     model_opt = OpenAIAdam(model.parameters(),
                            lr=args.lr,
                            schedule=args.lr_schedule,

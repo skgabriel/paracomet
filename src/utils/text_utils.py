@@ -116,3 +116,8 @@ class TextEncoder(object):
                     text_tokens.extend([self.encoder.get(t, 0) for t in self.bpe(token.text.lower()).split(' ')])
                 texts_tokens.append(text_tokens)
         return texts_tokens
+
+def fix_malformed(rel):
+    if '<|' in rel:
+       return 'no effect'
+    return rel
