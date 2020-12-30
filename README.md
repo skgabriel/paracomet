@@ -69,7 +69,7 @@ Split data using split.py in ds folder
 
 Change format between comet and heuristic data by setting comet = True or comet = False in split.py file 
 
-For comet data, files are in the format "c_h_atomic_{split}.txt"
+For comet data, files are in the format "c_atomic_{split}.txt"
 
 For heuristic data, files are in the format "h_atomic_{split}.txt"
 
