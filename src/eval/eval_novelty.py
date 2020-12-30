@@ -10,7 +10,6 @@ import random
 import ast 
 import itertools 
 import csv
-from collections import Counter
 from Levenshtein import ratio
 
 def convert_l(l):
@@ -36,33 +35,33 @@ def add_template(rel, dim, kg_type='atomic'):
     if rel[-1] != '.':
        rel += '.'
 
-    if 'xEffect' in dim: #yes
+    if 'xEffect' in dim: 
        return 'PersonX is likely: ' + rel #return 'PersonX ' + rel
 
-    if 'oEffect' in dim: #yes
+    if 'oEffect' in dim: 
        return 'PersonY is likely: ' + rel #return 'PersonY ' + rel
 
-    if 'xWant' in dim: #yes
+    if 'xWant' in dim: 
        return 'PersonX wants: ' + rel #'PersonX will want to ' + rel
-    if 'oWant' in dim: #yes
+    if 'oWant' in dim: 
        return 'PersonY wants: ' + rel
 
-    if 'xIntent' in dim: #yes
+    if 'xIntent' in dim: 
        return 'PersonX wanted: ' + rel #'The intent was ' + rel
 
     if 'oIntent' in dim:
        return 'PersonY wanted: ' + rel
 
-    if 'xAttr' in dim: #yes
+    if 'xAttr' in dim: 
        return 'PersonX is seen as: ' + rel
 
-    if 'xNeed' in dim: #yes
+    if 'xNeed' in dim: 
        return 'PersonX needed: ' + rel #'PersonX needs to ' + rel
 
-    if 'xReact' in dim: #yes
+    if 'xReact' in dim: 
        return 'PersonX then feels: ' + rel #'PersonX feels ' + rel
 
-    if 'oReact' in dim: #yes
+    if 'oReact' in dim: 
        return 'Others then feel: ' + rel #'PersonY feels ' + rel
     return rel
 
@@ -88,35 +87,17 @@ def reverse_template(rel):
        return 'xIntent'
 random.seed(0)
 
-parser = argparse.ArgumentParser(description='Evaluate bleu')
-parser.add_argument('--model_type',type=str,default='mem')
-parser.add_argument('--decoding',type=str,default='beam')
-parser.add_argument('--input_dir',type=str,default='./gen_data/gpt2')
-parser.add_argument('--data_dir',type=str,default='./data')
-parser.add_argument('--kg_type',type=str,default='atomic')
-parser.add_argument('--print_iter',type=int,default=50)
-parser.add_argument('--ref',type=str,default='rel')
+parser = argparse.ArgumentParser(description='Evaluate novelty')
+parser.add_argument('--decoded_file',type=str,default='../../data/gen_data/beam_outputs.jsonl')
+parser.add_argument('--gold_file',type=str,default='../../data/gold_set.jsonl')
 args = parser.parse_args()
 
-dir_ = args.input_dir 
-model_type = args.model_type
-if model_type == 'comet_mem':
-   model_name = 'mem_comet_beam_comet_outputs.jsonl'
-elif model_type == 'comet_baseline':
-   model_name = 'baseline_beam_comet_outputs.jsonl'
-elif model_type != 'val' and model_type != 'bval':
-   model_name = model_type + '_' + args.decoding + '_outputs.jsonl'
-elif model_type == 'bval':
-   model_name = 'comet-b1.jsonl'
-else:
-   model_name = 'comet-b10.jsonl'
-
-original_data = open('./gold_set.jsonl')
+original_data = open(args.gold_file)
 original_data = [json.loads(l) for l in original_data.readlines()] 
-data = [json.loads(l) for l in open(os.path.join(dir_, model_name)).readlines()]
+data = [json.loads(l) for l in open(args.decoded_file).readlines()]
 dims = ["xNeed","xIntent","xWant","oEffect","xReact","oWant","oReact","xEffect","xAttr"]
 
-training_rels_all = [l for l in csv.reader(open('./data/v4_atomic_all.csv'))][1:]
+training_rels_all = [l for l in csv.reader(open('../../data/v4_atomic_all.csv'))][1:]
 training_rels_all = [list(itertools.chain.from_iterable([convert_l(o) for o in l[1:-2]])) for l in training_rels_all]
 training_rels_all = set(list(itertools.chain.from_iterable(training_rels_all)))
 
@@ -130,31 +111,18 @@ dim_rels = []
 nodim_rels = []
 for l in original_data:
     stories.append(l['story'])
-    if model_type == 'val' or model_type == 'bval' or model_type == 'gold_retrieval':
-       d_ = [entry for entry in data if ' '.join([entry['sentence1'],entry['sentence2'],entry['sentence3'],entry['sentence4'],entry['sentence5']]) == l['story']][0]
-    else:
-       try:
-          d_ = [entry for entry in data if entry['story'] == l['story']][0]
-       except:
-          import pdb; pdb.set_trace()
+    d_ = [entry for entry in data if entry['story'] == l['story']]
+    if len(d_) == 0:
+       continue 
+    d_ = d_[0]
     dim = reverse_template(l['prefix'])
     dim_rels.append(dim)
     gold_rel = l['prefix'] + ' ' + l['rel']
-    if model_type == 'gold_retrieval':
-       gen_rel = d_["distance_supervision_relations"][str(l['sentID'])][dim]['relations'][-1]
-    elif model_type == 'val': 
-       gen_rel = [ast.literal_eval(r) for r in d_['distance_supervision_relations'][int(l['sentID'])][1][0][0][1:-1]][dims.index(dim)] 
-    elif model_type == 'bval':
-       gen_rel = [ast.literal_eval(r) for r in d_['distance_supervision_relations'][int(l['sentID'])][1][0][0][1:-1]][dims.index(dim)]
-    else:
-       gen_rel = d_['<|sent' + str(l['sentID']) + '|>_generated_relations'][dims.index(dim)]
+    gen_rel = d_['<|sent' + str(l['sentID']) + '|>_generated_relations'][dims.index(dim)]
     gen_rel = [g for g in gen_rel if g.lower() != 'none' and g.lower() != 'none.']
     nodim_rels.extend(gen_rel)
 
 print('num unique stories: ' + str(len(set(stories))))
-distr = Counter(dim_rels)
-print('distr: ' + str(distr))
-
 
 nodim_rels = [l.lower() for l in nodim_rels]
 training_rels_all = [l.lower() for l in training_rels_all]

@@ -9,6 +9,7 @@ import ast
 import csv
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import wordnet as wn
+##format SEMBERT input 
 
 def reverse_template(rel):
     prefix = rel.split(':')[0]
@@ -85,7 +86,7 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
     if not rel_.endswith('.'):
        rel_ += '.'
     #subj = [token for token in text if token.dep == 'nsubj'][0]
-    if 'xEffect' in dim: #yes
+    if 'xEffect' in dim: 
        if not rel_.startswith('to'):
           rel_ = 'to ' + ' '.join([WordNetLemmatizer().lemmatize(w,'v') for w in rel_.split(' ')])
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -94,7 +95,7 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
           root = pronoun + ' is likely ' 
 #       root = pronoun + ' are likely ' #'The first person is likely ' #return 'PersonX ' + rel
 
-    if 'oEffect' in dim: #yes
+    if 'oEffect' in dim: 
        if not rel_.startswith('to'):
           rel_ = 'to ' + ' '.join([WordNetLemmatizer().lemmatize(w,'v') for w in rel_.split(' ')])
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -102,7 +103,7 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
        else: 
           root = pronoun + ' is likely '  
 
-    if 'xWant' in dim: #yes
+    if 'xWant' in dim: 
        if not rel_.startswith('to'):
           rel_ = 'to ' + ' '.join([WordNetLemmatizer().lemmatize(w,'v') for w in rel_.split(' ')])
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -110,12 +111,12 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
        else: 
           root = pronoun + ' wants ' 
 
-    if 'oWant' in dim: #yes
+    if 'oWant' in dim: 
        if not rel_.startswith('to'):
           rel_ = 'to ' + ' '.join([WordNetLemmatizer().lemmatize(w,'v') for w in rel_.split(' ')])
        root = pronoun + ' want ' #'The second person wants '
 
-    if 'xIntent' in dim: #yes
+    if 'xIntent' in dim: 
        if not rel_.startswith('to'):
           rel_ = 'to ' + ' '.join([WordNetLemmatizer().lemmatize(w,'v') for w in rel_.split(' ')])
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -123,7 +124,7 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
        else: 
           root = pronoun + ' wanted ' 
 
-    if 'xAttr' in dim: #yes
+    if 'xAttr' in dim: 
        if rel_.startswith('to'):
           rel_ = convert(rel_, WN_VERB, WN_ADJECTIVE)
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -131,13 +132,13 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
        else: 
           root = pronoun + ' is seen as ' 
 
-    if 'xNeed' in dim: #yes
+    if 'xNeed' in dim: 
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
           root = pronoun + ' needed ' #'The second person needs ' #'PersonX needs to ' + rel
        else: 
           root = pronoun + ' needed ' 
 
-    if 'xReact' in dim: #yes
+    if 'xReact' in dim: 
        if rel_.startswith('to'):
           rel_ = convert(rel_, WN_VERB, WN_ADJECTIVE)
        if pronoun.lower() == 'they' or pronoun.lower() == 'we':
@@ -145,7 +146,7 @@ def normalize_rel(rel, dim, kg_type='atomic',pronoun='They'):
        else: 
           root = pronoun + ' then feels ' 
 
-    if 'oReact' in dim: #yes
+    if 'oReact' in dim: 
        if rel_.startswith('to'):
           rel_ = convert(rel_, WN_VERB, WN_ADJECTIVE)
        root = 'The others then feel ' #'The others then feel ' #'PersonY feels ' + rel
@@ -158,7 +159,7 @@ random.seed(0)
 parser = argparse.ArgumentParser(description='make tsv')
 parser.add_argument('--input_file',type=str,default='examples.jsonl')
 parser.add_argument('--output_file',type=str, default='beam_outputs')
-parser.add_argument('--data_dir',type=str,default='../data')
+parser.add_argument('--data_dir',type=str,default='../../data')
 args = parser.parse_args()
 
 output_file = args.output_file + ".tsv"
@@ -173,11 +174,11 @@ stories = []
 dim_rels = []
 tsv_writer.writerow(['story','relation','sent_id'])
 stories = []
-for l in original_data:
-    story = nltk.tokenize.sent_tokenize(l['story'])
-    dim = reverse_template(l['prefix'])
-    gen_rel = l_['<|sent' + str(l['sentID']) + '|>_generated_relations'][dims.index(dim)][0]
-    gen_rel = normalize_rel(gen_rel, dim)
-    for sent in range(5):
-        tsv_writer.writerow([story[sent],gen_rel, str(sent)])
+for l_ in original_data:
+    story = nltk.tokenize.sent_tokenize(l_['story'])
+    for sent in range(len(story))[:5]:
+        for d in dims:
+            gen_rel = l_['<|sent' + str(sent) + '|>_generated_relations'][dims.index(d)][0]
+            gen_rel = normalize_rel(gen_rel, d)
+            tsv_writer.writerow([story[sent],gen_rel, str(sent)])
           
