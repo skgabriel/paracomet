@@ -114,7 +114,7 @@ else:
 model.resize_token_embeddings(n_vocab)
 if args.use_multigpu:
    model = nn.DataParallel(model).to(device)
-model.load_state_dict(torch.load(model_path))
+model.load_state_dict(torch.load(model_path,map_location=torch.device(device)))
 model.eval()
 
 print("device", device, "n_gpu", args.n_gpu)
@@ -140,7 +140,7 @@ def clean_gen(gen):
        gen = [t for t in gen if t != '<unk>']
     gen = "".join([word.replace("</w>", " ") for word in gen])
     gen = gen.replace("<|endoftext|>","")
-    if gen[-1] == ' ':
+    if len(gen) > 0 and gen[-1] == ' ':
        gen = gen[:-1]
     return fix_malformed(gen)
 
