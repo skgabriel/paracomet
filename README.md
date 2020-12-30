@@ -104,9 +104,7 @@ Note: Make sure to decode using one GPU for memory model. (If using a multi GPU 
 
 [Data](https://github.com/skgabriel/paracomet/blob/main/data/gold_set.jsonl)
 
-Evaluation scripts are included under src/eval, including scripts to reformat generated inferences for NLI evaluation. To run the full NLI evaluation, refer to the original github repo for [SEMBERT](https://github.com/cooelf/SemBERT). 
-
-
+Evaluation scripts are included under src/eval, including scripts to reformat generated inferences for NLI evaluation. To run the full NLI evaluation, refer to the original github repo for [SemBERT](https://github.com/cooelf/SemBERT). 
 
 #### Pretrained Models 
 
@@ -116,6 +114,10 @@ Evaluation scripts are included under src/eval, including scripts to reformat ge
 |nomem      | Para-M (w/o Memory) | [link](https://drive.google.com/drive/u/0/folders/1HHTUtUBoYbH5u7dnXzWnteCIMzTUVd9d) |
 
 Note: Models were trained in a multi GPU setting, so ensure args.use_multigpu is set to True when decoding from pretrained models. 
+
+#### Interactive Mode 
+
+To most easily run pretrained models with your own data, use the narrative inference demo repo [here](https://github.com/skgabriel/narrative_inference_demo). Demo code will be integrated into the main github repo at a later point in time.  
 
 ### References 
 
