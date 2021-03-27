@@ -54,7 +54,7 @@ python distant_supervision.py --target_dir ../../data/atomic
 
 #### Distant Supervision (COMET) 
 
-Get pretrained comet models from [link](https://drive.google.com/open?id=1FccEsYPUHnjzmX-Y5vjCBeyRt1pLo8FB) and place in data folder
+Get pretrained comet models from [link](https://drive.google.com/drive/folders/17QQM9oVAS-vY-tIHUxjR2e2Sz3DBVYjj?usp=sharing) and place in data folder
 
 ```
 cd src/ds
