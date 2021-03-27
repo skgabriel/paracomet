@@ -45,6 +45,8 @@ Data for distant supervision should be a file "train-processed.jsonl" in the dat
 dict_keys(['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sentence4', 'sentence5', 'sentence1_tokens', 'sentence1_noun_phrases', 'sentence1_verb_phrases', 'sentence2_tokens', 'sentence2_noun_phrases', 'sentence2_verb_phrases', 'sentence3_tokens', 'sentence3_noun_phrases', 'sentence3_verb_phrases', 'sentence4_tokens', 'sentence4_noun_phrases', 'sentence4_verb_phrases', 'sentence5_tokens', 'sentence5_noun_phrases', 'sentence5_verb_phrases'])
 ```
 
+Get the preprocessed data from [link](https://drive.google.com/drive/u/0/folders/1PNyCgWsC7-wyk3h9E7e2_MVoKO8-iawx) and place in data folder
+
 #### Distant Supervision (Heuristic) 
 
 ```
@@ -54,7 +56,7 @@ python distant_supervision.py --target_dir ../../data/atomic
 
 #### Distant Supervision (COMET) 
 
-Get pretrained comet models from [link](https://drive.google.com/drive/folders/17QQM9oVAS-vY-tIHUxjR2e2Sz3DBVYjj?usp=sharing) and place in data folder
+Get pretrained comet model from [link](https://drive.google.com/drive/folders/17QQM9oVAS-vY-tIHUxjR2e2Sz3DBVYjj?usp=sharing) and place in data folder
 
 ```
 cd src/ds
