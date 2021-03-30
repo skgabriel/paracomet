@@ -307,14 +307,14 @@ def do_example(text_encoder, prefix, suffix, do_prefix, do_suffix):
             final_prefix = handle_underscores(prefix, text_encoder, True)
         else:
             final_prefix = text_encoder.encode([prefix], verbose=False)[0]
+        final_prefix = final_prefix[:17]
     if do_suffix:
         if "_" in suffix:
             final_suffix = handle_underscores(suffix, text_encoder)
         else:
             final_suffix = text_encoder.encode([suffix], verbose=False)[0]
-
+        final_suffix = final_suffix[:17]
     return final_prefix, final_suffix
-
 
 def compile_final_sequence(opt, final_prefix, final_suffix, category, text_encoder):
     final = []
