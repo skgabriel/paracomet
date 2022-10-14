@@ -30,7 +30,7 @@ Note: For now, the code assumes that stories contain at most 5 sentences and mod
 ```
 pip install -r requirements.txt 
 cd data
-wget https://homes.cs.washington.edu/~msap/atomic/data/atomic_data.tgz 
+wget https://storage.googleapis.com/ai2-mosaic/public/atomic/v1.0/atomic_data.tgz
 tar -xvzf atomic_data.tgz 
 ```
 
